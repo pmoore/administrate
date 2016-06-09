@@ -16,7 +16,7 @@ module Administrate
 
     def namespace_controller_paths
       all_controller_paths.select do |controller|
-        controller.starts_with?(namespace.to_s)
+        controller.starts_with?("#{namespace.to_s}/")
       end
     end
 
