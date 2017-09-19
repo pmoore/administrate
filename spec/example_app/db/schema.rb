@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170507115814) do
+ActiveRecord::Schema.define(version: 20170510122301) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,13 +23,38 @@ ActiveRecord::Schema.define(version: 20170507115814) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "customers", id: :serial, force: :cascade do |t|
-    t.string "name", null: false
-    t.string "email", null: false
+  create_table "countries", force: :cascade do |t|
+    t.string   "code",       null: false
+    t.string   "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "email_subscriber"
-    t.string "kind", default: "standard", null: false
+  end
+
+  add_index "countries", ["code"], name: "index_countries_on_code", unique: true, using: :btree
+
+  create_table "customers", force: :cascade do |t|
+    t.string   "name",                                  null: false
+    t.string   "email",                                 null: false
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
+    t.boolean  "email_subscriber"
+    t.string   "kind",             default: "standard", null: false
+    t.string   "country_code"
+  end
+
+  create_table "delayed_jobs", id: :serial, force: :cascade do |t|
+    t.integer "priority", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.text "handler", null: false
+    t.text "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string "locked_by"
+    t.string "queue"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
   create_table "line_items", id: :serial, force: :cascade do |t|
@@ -61,6 +86,14 @@ ActiveRecord::Schema.define(version: 20170507115814) do
     t.index ["order_id"], name: "index_payments_on_order_id"
   end
 
+  create_table "product_meta_tags", id: :serial, force: :cascade do |t|
+    t.integer "product_id"
+    t.string "meta_title", null: false
+    t.string "meta_description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "products", id: :serial, force: :cascade do |t|
     t.string "name"
     t.float "price"
@@ -70,6 +103,10 @@ ActiveRecord::Schema.define(version: 20170507115814) do
     t.datetime "updated_at", null: false
     t.string "slug", null: false
     t.index ["slug"], name: "index_products_on_slug", unique: true
+  end
+
+  create_table "series", force: :cascade do |t|
+    t.string "name", null: false
   end
 
   add_foreign_key "line_items", "orders"
