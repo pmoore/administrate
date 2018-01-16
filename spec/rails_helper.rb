@@ -20,6 +20,7 @@ end
 RSpec.configure do |config|
   config.include Features, type: :feature
   config.include DashboardHelpers
+  config.include ControllerHelpers
   config.infer_base_class_for_anonymous_controllers = false
   config.infer_spec_type_from_file_location!
   config.use_transactional_fixtures = false
@@ -31,3 +32,7 @@ end
 
 ActiveRecord::Migration.maintain_test_schema!
 Capybara.javascript_driver = :poltergeist
+Capybara.register_driver :poltergeist do |app|
+  options = { phantomjs_options: ["--load-images=no"] }
+  Capybara::Poltergeist::Driver.new(app, options)
+end

@@ -2,6 +2,12 @@ require "rails_helper"
 require "generators/administrate/dashboard/dashboard_generator"
 
 describe Administrate::Generators::DashboardGenerator, :generator do
+  around do |example|
+    ActiveRecord::Migration.suppress_messages do
+      example.run
+    end
+  end
+
   describe "dashboard definition file" do
     it "has valid syntax" do
       dashboard = file("app/dashboards/customer_dashboard.rb")
@@ -153,7 +159,10 @@ describe Administrate::Generators::DashboardGenerator, :generator do
           ActiveRecord::Schema.define do
             create_table(:users) { |t| t.boolean :active }
           end
-          class User < ActiveRecord::Base; end
+
+          class User < ActiveRecord::Base
+            reset_column_information
+          end
 
           run_generator ["user"]
           load file("app/dashboards/user_dashboard.rb")
@@ -270,7 +279,7 @@ describe Administrate::Generators::DashboardGenerator, :generator do
           end
           class User < ActiveRecord::Base; end
           class Invitation < ActiveRecord::Base
-            belongs_to :sender, class_name: User
+            belongs_to :sender, class_name: "User"
             belongs_to :recipient, class_name: "User"
           end
 
@@ -432,7 +441,7 @@ describe Administrate::Generators::DashboardGenerator, :generator do
       expect(controller).to have_correct_syntax
     end
 
-    it "subclasses Admin::ApplicationController" do
+    it "subclasses Admin::ApplicationController by default" do
       begin
         ActiveRecord::Schema.define { create_table :foos }
         class Foo < ActiveRecord::Base; end
@@ -445,6 +454,25 @@ describe Administrate::Generators::DashboardGenerator, :generator do
       ensure
         remove_constants :Foo
         Admin.send(:remove_const, :FoosController)
+      end
+    end
+
+    it "uses the given namespace to create controllers" do
+      begin
+        ActiveRecord::Schema.define { create_table :foos }
+        class Foo < ActiveRecord::Base; end
+        module Manager
+          class ApplicationController < Administrate::ApplicationController; end
+        end
+
+        run_generator ["foo", "--namespace", "manager"]
+        load file("app/controllers/manager/foos_controller.rb")
+
+        expect(Manager::FoosController.ancestors).
+          to include(Manager::ApplicationController)
+      ensure
+        remove_constants :Foo
+        Manager.send(:remove_const, :FoosController)
       end
     end
   end

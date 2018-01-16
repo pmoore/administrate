@@ -5,7 +5,10 @@ fr:
       confirm: Êtes-vous sûr ?
       destroy: Supprimer
       edit: Modifier
-      show: Détails
+      edit_resource: Modifier %{name}
+      show_resource: Détails %{name}
+      new_resource: Création %{name}
+      back: Précédent
     controller:
       create:
         success: "%{resource} a été correctement créé(e)."
@@ -17,7 +20,9 @@ fr:
       has_many:
         more: "%{count} sur %{total_count}"
         none: Aucun
-      polymorphic:
-        not_supported: Les relations polymorphiques dans les formulaires ne sont pas supportées.
-      has_one:
-        not_supported: Les relations HasOne dans les formulaires ne sont pas supportées.
+    form:
+      error: error
+      errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
+    search:
+      clear: Effacer la recherche
+      label: Chercher %{resource}

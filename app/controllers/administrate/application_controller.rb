@@ -4,7 +4,10 @@ module Administrate
 
     def index
       search_term = params[:search].to_s.strip
-      resources = Administrate::Search.new(resource_resolver, search_term).run
+      resources = Administrate::Search.new(scoped_resource,
+                                           dashboard_class,
+                                           search_term).run
+      resources = resources.includes(*resource_includes) if resource_includes.any?
       resources = order.apply(resources)
       resources = resources.page(params[:page]).per(records_per_page)
       page = Administrate::Page::Collection.new(dashboard, order: order)
@@ -13,6 +16,7 @@ module Administrate
         resources: resources,
         search_term: search_term,
         page: page,
+        show_search_bar: show_search_bar?
       }
     end
 
@@ -23,8 +27,10 @@ module Administrate
     end
 
     def new
+      resource = resource_class.new
+      authorize_resource(resource)
       render locals: {
-        page: Administrate::Page::Form.new(dashboard, resource_class.new),
+        page: Administrate::Page::Form.new(dashboard, resource),
       }
     end
 
@@ -36,6 +42,7 @@ module Administrate
 
     def create
       resource = resource_class.new(resource_params)
+      authorize_resource(resource)
 
       if resource.save
         redirect_to(
@@ -72,11 +79,18 @@ module Administrate
 
     helper_method :nav_link_state
     def nav_link_state(resource)
-      if resource_name.to_s.pluralize == resource.to_s
-        :active
-      else
-        :inactive
+      resource_name.to_s.pluralize == resource.to_s ? :active : :inactive
+    end
+
+    helper_method :valid_action?
+    def valid_action?(name, resource = resource_class)
+      !!routes.detect do |controller, action|
+        controller == resource.to_s.underscore.pluralize && action == name.to_s
       end
+    end
+
+    def routes
+      @routes ||= Namespace.new(namespace).routes
     end
 
     def records_per_page
@@ -88,26 +102,47 @@ module Administrate
     end
 
     def dashboard
-      @_dashboard ||= resource_resolver.dashboard_class.new
+      @_dashboard ||= dashboard_class.new
     end
 
     def requested_resource
-      @_requested_resource ||= find_resource(params[:id])
+      @_requested_resource ||= find_resource(params[:id]).tap do |resource|
+        authorize_resource(resource)
+      end
     end
 
     def find_resource(param)
-      resource_class.find(param)
+      scoped_resource.find(param)
+    end
+
+    def scoped_resource
+      resource_class.default_scoped
+    end
+
+    def resource_includes
+      dashboard.association_includes
     end
 
     def resource_params
-      params.require(resource_name).permit(*permitted_attributes)
+      params.require(resource_class.model_name.param_key).
+        permit(dashboard.permitted_attributes).
+        transform_values { |v| read_param_value(v) }
     end
 
-    def permitted_attributes
-      dashboard.permitted_attributes
+    def read_param_value(data)
+      if data.is_a?(ActionController::Parameters) && data[:type]
+        if data[:type] == Administrate::Field::Polymorphic.to_s
+          GlobalID::Locator.locate(data[:value])
+        else
+          raise "Unrecognised param data: #{data.inspect}"
+        end
+      else
+        data
+      end
     end
 
-    delegate :resource_class, :resource_name, :namespace, to: :resource_resolver
+    delegate :dashboard_class, :resource_class, :resource_name, :namespace,
+      to: :resource_resolver
     helper_method :namespace
     helper_method :resource_name
 
@@ -121,6 +156,26 @@ module Administrate
         "administrate.controller.#{key}",
         resource: resource_resolver.resource_title,
       )
+    end
+
+    def show_search_bar?
+      dashboard.attribute_types_for(
+        dashboard.collection_attributes
+      ).any? { |_name, attribute| attribute.searchable? }
+    end
+
+    def show_action?(action, resource)
+      true
+    end
+    helper_method :show_action?
+
+    def new_resource
+      resource_class.new
+    end
+    helper_method :new_resource
+
+    def authorize_resource(resource)
+      resource
     end
   end
 end

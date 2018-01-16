@@ -5,7 +5,10 @@ pl:
       confirm: Czy jesteś pewien?
       destroy: Usuń
       edit: Edytuj
-      show: Wyświetl
+      edit_resource: Edytuj %{name}
+      show_resource: Wyświetl %{name}
+      new_resource: Nowy %{name}
+      back: Wstecz
     controller:
       create:
         success: "Zasób %{resource} został pomyślnie utworzony."
@@ -17,7 +20,9 @@ pl:
       has_many:
         more: Wyświetlanie %{count} z %{total_count}
         none: Brak
-      polymorphic:
-        not_supported: Relacje polimorficzne nie są obsługiwane.
-      has_one:
-        not_supported: Relacje jeden-do-jednego nie są obsługiwane.
+    form:
+      error: error
+      errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
+    search:
+      clear: Wyczyść wyszukiwanie
+      label: Szukanie %{resource}

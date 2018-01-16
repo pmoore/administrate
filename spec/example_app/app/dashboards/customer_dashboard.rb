@@ -7,9 +7,11 @@ class CustomerDashboard < Administrate::BaseDashboard
     email_subscriber: Field::Boolean,
     lifetime_value: Field::Number.with_options(prefix: "$", decimals: 2),
     name: Field::String,
-    orders: Field::HasMany,
+    orders: Field::HasMany.with_options(limit: 2),
     updated_at: Field::DateTime,
     kind: Field::Select.with_options(collection: Customer::KINDS),
+    country: Field::BelongsTo.
+      with_options(primary_key: :code, foreign_key: :country_code),
   }
 
   COLLECTION_ATTRIBUTES = ATTRIBUTE_TYPES.keys
@@ -19,6 +21,7 @@ class CustomerDashboard < Administrate::BaseDashboard
     :email,
     :email_subscriber,
     :kind,
+    :country,
   ].freeze
 
   def display_resource(customer)

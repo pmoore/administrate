@@ -20,6 +20,14 @@ module Administrate
       def associated_class_name
         options.fetch(:class_name, attribute.to_s.singularize.camelcase)
       end
+
+      def primary_key
+        options.fetch(:primary_key, :id)
+      end
+
+      def foreign_key
+        options.fetch(:foreign_key, :"#{attribute}_id")
+      end
     end
   end
 end

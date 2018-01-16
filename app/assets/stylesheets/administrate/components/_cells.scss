@@ -1,6 +1,4 @@
 .cell-label {
-  @include data-label;
-
   &:hover {
     a {
       color: $action-color;
@@ -13,10 +11,10 @@
   }
 
   a {
-    @include fill-parent;
     color: inherit;
     display: inline-block;
     transition: color $base-duration $base-timing;
+    width: 100%;
   }
 }
 
@@ -26,16 +24,14 @@
 }
 
 .cell-label__sort-indicator {
-  display: inline-block;
-  height: 1em;
-  overflow: hidden;
-  position: absolute;
-  right: 0;
+  float: right;
+  margin-left: 5px;
 
   svg {
-    height: 100%;
-    transition: transform $base-duration $base-timing;
     fill: $hint-grey;
+    height: 13px;
+    transition: transform $base-duration $base-timing;
+    width: 13px;
   }
 }
 

@@ -11,12 +11,16 @@ module Administrate
           dashboard.class.to_s.scan(/(.+)Dashboard/).first.first.underscore
       end
 
+      def resource_path
+        @resource_path ||= resource_name.gsub("/", "_")
+      end
+
       protected
 
       def attribute_field(dashboard, resource, attribute_name, page)
         value = get_attribute_value(resource, attribute_name)
         field = dashboard.attribute_type_for(attribute_name)
-        field.new(attribute_name, value, page)
+        field.new(attribute_name, value, page, resource: resource)
       end
 
       def get_attribute_value(resource, attribute_name)

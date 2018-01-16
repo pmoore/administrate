@@ -3,7 +3,7 @@
 When you install Administrate into your app,
 we generate empty controllers for each of your resources.
 If you want to create more complex application behavior for a dashboard,
-simply overwrite controller actions.
+you can overwrite controller actions.
 
 The generated controller will look something like:
 
@@ -27,6 +27,16 @@ class Admin::FoosController < Admin::ApplicationController
   #
   # def find_resource(param)
   #   Foo.find_by!(slug: param)
+  # end
+  #
+  # Override this if you have certain roles that require a subset
+  # this will be used to set the records shown on the `index` action.
+  # def scoped_resource
+  #  if current_user.super_admin?
+  #    resource_class
+  #  else
+  #    resource_class.with_less_stuff
+  #  end
   # end
 end
 ```

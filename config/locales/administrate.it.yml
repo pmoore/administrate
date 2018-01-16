@@ -5,7 +5,10 @@ it:
       confirm: Sei sicuro?
       destroy: Elimina
       edit: Modifica
-      show: Visualizza
+      edit_resource: Modifica %{name}
+      show_resource: Visualizza %{name}
+      new_resource: Nuovo %{name}
+      back: Indietro
     controller:
       create:
         success: "%{resource} è stato creato con successo."
@@ -17,7 +20,9 @@ it:
       has_many:
         more: Visualizzo %{count} di %{total_count}
         none: Nessuno
-      polymorphic:
-        not_supported: Associazioni polimorfiche non ancora supportate. Spiacenti!
-      has_one:
-        not_supported: Associazioni HasOne non ancora supportate. Spiacenti!
+    form:
+      error: error
+      errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
+    search:
+      clear: Cancella ricerca
+      label: Ricerca %{resource}
